@@ -28,7 +28,12 @@ if(UNIX)
     message(STATUS "APPINDICATOR_INCLUDE_DIRS: ${APPINDICATOR_INCLUDE_DIRS}")
 
     target_link_libraries(tray PUBLIC ${GTK3_LIBRARIES} ${APPINDICATOR_LIBRARIES})
-    target_include_directories(tray PUBLIC ${GTK3_INCLUDE_DIRS} ${APPINDICATOR_INCLUDE_DIRS})
+    target_include_directories(tray PUBLIC 
+        ${GTK3_INCLUDE_DIRS} 
+        ${APPINDICATOR_INCLUDE_DIRS}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tray/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(tray PRIVATE -Wall -Wextra -Werror -pedantic -Wno-ignored-qualifiers -Wno-deprecated-declarations)
@@ -36,14 +41,11 @@ if(UNIX)
 
 elseif(WIN32)
     target_link_libraries(tray PUBLIC shell32 user32)
+    target_include_directories(tray PUBLIC 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tray/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    )
 endif()
-
-# Add include directories for build and install
-# (headers are in tray/include)
-target_include_directories(tray PUBLIC 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tray/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-)
 
 # Install the library and its headers
 install(TARGETS tray
@@ -64,11 +66,21 @@ install(EXPORT tray_targets
         DESTINATION share/tray)
 
 # Generate the config file in the binary dir
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
+if(UNIX)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
 "include(CMakeFindDependencyMacro)\n"
-"# Add find_dependency() for any required dependencies here\n"
+"find_dependency(PkgConfig REQUIRED)\n"
+"pkg_check_modules(GTK3 REQUIRED gtk+-3.0)\n"
+"pkg_check_modules(APPINDICATOR REQUIRED ayatana-appindicator3-0.1)\n"
 "include(\"\${CMAKE_CURRENT_LIST_DIR}/tray-targets.cmake\")\n"
 )
+elseif(WIN32)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
+"include(CMakeFindDependencyMacro)\n"
+"# Windows dependencies are system libraries\n"
+"include(\"\${CMAKE_CURRENT_LIST_DIR}/tray-targets.cmake\")\n"
+)
+endif()
 
 # Install the generated config file
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
