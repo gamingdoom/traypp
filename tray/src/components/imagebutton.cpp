@@ -1,5 +1,5 @@
-#include <components/imagebutton.hpp>
-#include <core/traybase.hpp>
+#include <tray/components/imagebutton.hpp>
+#include <tray/core/traybase.hpp>
 #include <utility>
 
 Tray::ImageButton::ImageButton(std::string text, Image image, std::function<void()> callback)
