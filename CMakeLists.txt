@@ -53,7 +53,7 @@ install(TARGETS tray
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 file(GLOB_RECURSE TRAY_HEADERS "tray/include/*.hpp")
-install(FILES ${TRAY_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tray)
+install(FILES ${TRAY_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Export targets for find_package
 install(EXPORT tray_targets
