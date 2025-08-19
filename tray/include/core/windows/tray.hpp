@@ -1,7 +1,7 @@
 #pragma once
 #if defined(_WIN32)
 #include <windows.h>
-#include <tray/core/traybase.hpp>
+#include <core/traybase.hpp>
 #include <map>
 #include <shellapi.h>
 
@@ -33,5 +33,4 @@ namespace Tray
         void update() override;
     };
 } // namespace Tray
-
 #endif

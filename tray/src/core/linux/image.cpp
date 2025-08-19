@@ -1,5 +1,5 @@
 #if defined(__linux__)
-#include <tray/core/image.hpp>
+#include <core/image.hpp>
 
 Tray::Image::Image(GtkWidget *image) : image(image) {}
 Tray::Image::Image(const char *path) : Image(std::string(path)) {}

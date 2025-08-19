@@ -65,9 +65,11 @@ install(EXPORT tray_targets
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
 "include(CMakeFindDependencyMacro)\n"
 "# Add find_dependency() for any required dependencies here\n"
-"include(\"\${CMAKE_CURRENT_LIST_DIR}/tray-targets.cmake\")\n"
+"include(\"${CMAKE_CURRENT_LIST_DIR}/tray-targets.cmake\")\n"
 )
 
 # Install the generated config file
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/tray-config.cmake"
         DESTINATION share/tray)
+
+set_target_properties(tray PROPERTIES VERSION ${PROJECT_VERSION})

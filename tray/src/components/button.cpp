@@ -1,4 +1,4 @@
-#include <tray/components/button.hpp>
+#include <components/button.hpp>
 #include <utility>
 
 Tray::Button::Button(std::string text, std::function<void()> callback)

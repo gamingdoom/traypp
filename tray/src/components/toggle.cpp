@@ -1,4 +1,4 @@
-#include <tray/components/toggle.hpp>
+#include <components/toggle.hpp>
 
 Tray::Toggle::Toggle(std::string text, bool state, std::function<void(bool)> callback)
     : TrayEntry(std::move(text)), toggled(state), callback(std::move(callback))

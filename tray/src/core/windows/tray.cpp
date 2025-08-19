@@ -1,16 +1,16 @@
 #if defined(_WIN32)
-#include <tray/core/entry.hpp>
-#include <tray/core/windows/tray.hpp>
+#include <core/entry.hpp>
+#include <core/windows/tray.hpp>
 #include <stdexcept>
 #include <windows.h>
 
-#include <tray/components/button.hpp>
-#include <tray/components/imagebutton.hpp>
-#include <tray/components/label.hpp>
-#include <tray/components/separator.hpp>
-#include <tray/components/submenu.hpp>
-#include <tray/components/syncedtoggle.hpp>
-#include <tray/components/toggle.hpp>
+#include <components/button.hpp>
+#include <components/imagebutton.hpp>
+#include <components/label.hpp>
+#include <components/separator.hpp>
+#include <components/submenu.hpp>
+#include <components/syncedtoggle.hpp>
+#include <components/toggle.hpp>
 
 static constexpr auto WM_TRAY = WM_USER + 1;
 const static auto WM_TASKBARCREATED = RegisterWindowMessageA("TaskbarCreated");
@@ -248,6 +248,5 @@ void Tray::Tray::pump()
         DispatchMessage(&msg);
     }
 }
-
 
 #endif

@@ -1,5 +1,5 @@
 #if defined(_WIN32)
-#include <tray/core/icon.hpp>
+#include <core/icon.hpp>
 
 Tray::Icon::Icon(const std::string &path)
     : hIcon(reinterpret_cast<HICON>(
@@ -14,6 +14,5 @@ Tray::Icon::operator HICON()
 {
     return hIcon;
 }
-
 
 #endif

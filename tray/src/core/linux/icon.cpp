@@ -1,5 +1,5 @@
 #if defined(__linux__)
-#include <tray/core/icon.hpp>
+#include <core/icon.hpp>
 
 Tray::Icon::Icon(std::string path) : iconPath(std::move(path)) {}
 Tray::Icon::Icon(const char *path) : iconPath(path) {}

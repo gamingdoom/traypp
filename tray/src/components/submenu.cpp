@@ -1,5 +1,5 @@
-#include <tray/components/submenu.hpp>
-#include <tray/core/entry.hpp>
+#include <components/submenu.hpp>
+#include <core/entry.hpp>
 
 Tray::Submenu::Submenu(std::string text) : TrayEntry(std::move(text)) {}
 void Tray::Submenu::update()
