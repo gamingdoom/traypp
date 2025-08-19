@@ -1,14 +1,14 @@
 #pragma once
-#include <components/button.hpp>
-#include <components/imagebutton.hpp>
-#include <components/label.hpp>
-#include <components/separator.hpp>
-#include <components/submenu.hpp>
-#include <components/syncedtoggle.hpp>
-#include <components/toggle.hpp>
+#include <tray/components/button.hpp>
+#include <tray/components/imagebutton.hpp>
+#include <tray/components/label.hpp>
+#include <tray/components/separator.hpp>
+#include <tray/components/submenu.hpp>
+#include <tray/components/syncedtoggle.hpp>
+#include <tray/components/toggle.hpp>
 
 #if defined(_WIN32)
-#include <core/windows/tray.hpp>
+#include <tray/core/windows/tray.hpp>
 #elif defined(__linux__)
-#include <core/linux/tray.hpp>
+#include <tray/core/linux/tray.hpp>
 #endif
