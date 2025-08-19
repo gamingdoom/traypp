@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(tray VERSION 0.2 DESCRIPTION "A cross-platform C++ system tray library")
+project(tray VERSION 0.2.1 DESCRIPTION "A cross-platform C++ system tray library")
 
 include(GNUInstallDirs)
 
