@@ -1,6 +1,6 @@
 #include <stdexcept>
 #if defined(_WIN32)
-#include <core/image.hpp>
+#include <tray/core/image.hpp>
 
 Tray::Image::Image(HBITMAP image) : image(image) {}
 Tray::Image::Image(const char *path) : Image(std::string(path)) {}
@@ -17,4 +17,5 @@ Tray::Image::operator HBITMAP()
 {
     return image;
 }
+
 #endif
