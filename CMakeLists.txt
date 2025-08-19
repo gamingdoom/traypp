@@ -31,7 +31,7 @@ if(UNIX)
     target_include_directories(tray PUBLIC ${GTK3_INCLUDE_DIRS} ${APPINDICATOR_INCLUDE_DIRS})
 
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        target_compile_options(tray PRIVATE -Wall -Wextra -Werror -pedantic -Wno-unused-lambda-capture)
+        target_compile_options(tray PRIVATE -Wall -Wextra -Werror -pedantic -Wno-ignored-qualifiers -Wno-deprecated-declarations)
     endif()
 
 elseif(WIN32)
