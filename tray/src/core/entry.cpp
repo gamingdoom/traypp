@@ -1,5 +1,5 @@
-#include <core/entry.hpp>
-#include <core/traybase.hpp>
+#include <tray/core/entry.hpp>
+#include <tray/core/traybase.hpp>
 
 Tray::TrayEntry::TrayEntry(std::string text) : text(std::move(text)) {}
 
