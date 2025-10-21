@@ -1,6 +1,6 @@
 #if defined(__linux__)
 #include <core/linux/tray.hpp>
-#include <libappindicator/app-indicator.h>
+#include <libayatana-appindicator/app-indicator.h>
 #include <stdexcept>
 
 #include <components/button.hpp>
@@ -165,6 +165,14 @@ void Tray::Tray::run()
     while (appIndicator)
     {
         gtk_main_iteration_do(true);
+    }
+}
+
+
+void Tray::Tray::pump()
+{
+    if(appIndicator) {
+        gtk_main_iteration_do(false);
     }
 }
 

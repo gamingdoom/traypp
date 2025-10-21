@@ -11,8 +11,8 @@ namespace Tray
     {
         HWND hwnd = nullptr;
         HMENU menu = nullptr;
-        WNDCLASSEX windowClass;
-        NOTIFYICONDATA notifyData;
+        WNDCLASSEXA windowClass;
+        NOTIFYICONDATAA notifyData;
 
         std::vector<std::shared_ptr<char[]>> allocations;
         static LRESULT CALLBACK wndProc(HWND, UINT, WPARAM, LPARAM);
@@ -28,6 +28,7 @@ namespace Tray
         }
 
         void run() override;
+        void pump() override;
         void exit() override;
         void update() override;
     };

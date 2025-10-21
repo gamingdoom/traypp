@@ -9,7 +9,7 @@ A cross-platform C++17 library that allows you to create simple tray menus.
 
 ## Dependencies
 - Linux
-  - libappindicator-gtk3
+  - libayatana-appindicator3-1
 
 ## Basic Usage
 ```cpp

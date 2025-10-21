@@ -1,8 +1,8 @@
 #if defined(_WIN32)
-#include <windows.h>
 #include <core/entry.hpp>
 #include <core/windows/tray.hpp>
 #include <stdexcept>
+#include <windows.h>
 
 #include <components/button.hpp>
 #include <components/imagebutton.hpp>
@@ -13,7 +13,7 @@
 #include <components/toggle.hpp>
 
 static constexpr auto WM_TRAY = WM_USER + 1;
-const static auto WM_TASKBARCREATED = RegisterWindowMessage("TaskbarCreated");
+const static auto WM_TASKBARCREATED = RegisterWindowMessageA("TaskbarCreated");
 std::map<HWND, std::reference_wrapper<Tray::Tray>> Tray::Tray::trayList;
 
 Tray::Tray::Tray(std::string identifier, Icon icon) : BaseTray(std::move(identifier), icon)
@@ -24,13 +24,13 @@ Tray::Tray::Tray(std::string identifier, Icon icon) : BaseTray(std::move(identif
     windowClass.lpszClassName = this->identifier.c_str();
     windowClass.hInstance = GetModuleHandle(nullptr);
 
-    if (RegisterClassEx(&windowClass) == 0)
+    if (RegisterClassExA(&windowClass) == 0)
     {
         throw std::runtime_error("Failed to register class");
     }
 
     // NOLINTNEXTLINE
-    hwnd = CreateWindow(this->identifier.c_str(), nullptr, 0, 0, 0, 0, 0, nullptr, nullptr, windowClass.hInstance,
+    hwnd = CreateWindowA(this->identifier.c_str(), nullptr, 0, 0, 0, 0, 0, nullptr, nullptr, windowClass.hInstance,
                         nullptr);
     if (hwnd == nullptr)
     {
@@ -42,14 +42,14 @@ Tray::Tray::Tray(std::string identifier, Icon icon) : BaseTray(std::move(identif
         throw std::runtime_error("Failed to update window");
     }
 
-    memset(&notifyData, 0, sizeof(NOTIFYICONDATA));
-    notifyData.cbSize = sizeof(NOTIFYICONDATA);
+    memset(&notifyData, 0, sizeof(NOTIFYICONDATAA));
+    notifyData.cbSize = sizeof(NOTIFYICONDATAA);
     notifyData.hWnd = hwnd;
     notifyData.uFlags = NIF_ICON | NIF_MESSAGE;
     notifyData.uCallbackMessage = WM_TRAY;
     notifyData.hIcon = this->icon;
 
-    if (Shell_NotifyIcon(NIM_ADD, &notifyData) == FALSE)
+    if (Shell_NotifyIconA(NIM_ADD, &notifyData) == FALSE)
     {
         throw std::runtime_error("Failed to register tray icon");
     }
@@ -61,11 +61,11 @@ Tray::Tray::~Tray()
 }
 void Tray::Tray::exit()
 {
-    Shell_NotifyIcon(NIM_DELETE, &notifyData);
+    Shell_NotifyIconA(NIM_DELETE, &notifyData);
     DestroyIcon(notifyData.hIcon);
     DestroyMenu(menu);
 
-    UnregisterClass(identifier.c_str(), GetModuleHandle(nullptr));
+    UnregisterClassA(identifier.c_str(), GetModuleHandle(nullptr));
     PostMessage(hwnd, WM_QUIT, 0, 0);
     allocations.clear();
 
@@ -78,7 +78,7 @@ void Tray::Tray::update()
     DestroyMenu(menu);
     menu = construct(entries, this, true);
 
-    if (Shell_NotifyIcon(NIM_MODIFY, &notifyData) == FALSE)
+    if (Shell_NotifyIconA(NIM_MODIFY, &notifyData) == FALSE)
     {
         throw std::runtime_error("Failed to update tray icon");
     }
@@ -99,18 +99,22 @@ HMENU Tray::Tray::construct(const std::vector<std::shared_ptr<TrayEntry>> &entri
         auto *item = entry.get();
 
         auto name = std::shared_ptr<char[]>(new char[item->getText().size() + 1]);
-        strcpy(name.get(), item->getText().c_str()); // NOLINT
+        strcpy_s(name.get(), item->getText().size() + 1, item->getText().c_str());
         parent->allocations.emplace_back(name);
 
-        MENUITEMINFO winItem{0};
+        MENUITEMINFOA winItem{0};
 
         winItem.wID = ++id;
         winItem.dwTypeData = name.get();
-        winItem.cbSize = sizeof(MENUITEMINFO);
+        winItem.cbSize = sizeof(MENUITEMINFOA);
         winItem.fMask = MIIM_TYPE | MIIM_STATE | MIIM_DATA | MIIM_ID;
         winItem.dwItemData = reinterpret_cast<ULONG_PTR>(item);
 
-        if (auto *toggle = dynamic_cast<Toggle *>(item); toggle)
+        auto *toggle = dynamic_cast<Toggle *>(item);
+        auto *syncedToggle = dynamic_cast<SyncedToggle *>(item);
+        auto *submenu = dynamic_cast<Submenu *>(item);
+        auto *iconButton = dynamic_cast<ImageButton *>(item);
+        if (toggle)
         {
             if (toggle->isToggled())
             {
@@ -121,7 +125,7 @@ HMENU Tray::Tray::construct(const std::vector<std::shared_ptr<TrayEntry>> &entri
                 winItem.fState |= MFS_UNCHECKED;
             }
         }
-        else if (auto *syncedToggle = dynamic_cast<SyncedToggle *>(item); syncedToggle)
+        else if (syncedToggle)
         {
             if (syncedToggle->isToggled())
             {
@@ -132,12 +136,12 @@ HMENU Tray::Tray::construct(const std::vector<std::shared_ptr<TrayEntry>> &entri
                 winItem.fState |= MFS_UNCHECKED;
             }
         }
-        else if (auto *submenu = dynamic_cast<Submenu *>(item); submenu)
+        else if (submenu)
         {
             winItem.fMask |= MIIM_SUBMENU;
             winItem.hSubMenu = construct(submenu->getEntries(), parent);
         }
-        else if (auto *iconButton = dynamic_cast<ImageButton *>(item); iconButton)
+        else if (iconButton)
         {
             winItem.fMask = MIIM_STRING | MIIM_BITMAP | MIIM_FTYPE | MIIM_STATE;
             winItem.hbmpItem = iconButton->getImage();
@@ -159,7 +163,7 @@ HMENU Tray::Tray::construct(const std::vector<std::shared_ptr<TrayEntry>> &entri
             }
         }
 
-        InsertMenuItem(menu, id, TRUE, &winItem);
+        InsertMenuItemA(menu, id, TRUE, &winItem);
     }
 
     return menu;
@@ -182,27 +186,33 @@ LRESULT CALLBACK Tray::Tray::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
         }
         break;
     case WM_COMMAND:
-        MENUITEMINFO winItem{0};
-        winItem.fMask = MIIM_DATA | MIIM_ID;
-        winItem.cbSize = sizeof(MENUITEMINFO);
-
-        auto &menu = trayList.at(hwnd).get();
-        if (GetMenuItemInfo(menu.menu, static_cast<UINT>(wParam), FALSE, &winItem))
         {
-            auto *item = reinterpret_cast<TrayEntry *>(winItem.dwItemData);
-            if (auto *button = dynamic_cast<Button *>(item); button)
+            MENUITEMINFOA winItem{0};
+            winItem.fMask = MIIM_DATA | MIIM_ID;
+            winItem.cbSize = sizeof(MENUITEMINFOA);
+
+            auto &menu = trayList.at(hwnd).get();
+            if (GetMenuItemInfoA(menu.menu, static_cast<UINT>(wParam), FALSE, &winItem))
             {
-                button->clicked();
-            }
-            else if (auto *toggle = dynamic_cast<Toggle *>(item); toggle)
-            {
-                toggle->onToggled();
-                menu.update();
-            }
-            else if (auto *syncedToggle = dynamic_cast<SyncedToggle *>(item); syncedToggle)
-            {
-                syncedToggle->onToggled();
-                menu.update();
+                auto *item = reinterpret_cast<TrayEntry *>(winItem.dwItemData);
+
+                auto *button = dynamic_cast<Button *>(item);
+                auto *toggle = dynamic_cast<Toggle *>(item);
+                auto *syncedToggle = dynamic_cast<SyncedToggle *>(item);
+                if (button)
+                {
+                    button->clicked();
+                }
+                else if (toggle)
+                {
+                    toggle->onToggled();
+                    menu.update();
+                }
+                else if (syncedToggle)
+                {
+                    syncedToggle->onToggled();
+                    menu.update();
+                }
             }
         }
         break;
@@ -210,7 +220,7 @@ LRESULT CALLBACK Tray::Tray::wndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM 
         if (msg == WM_TASKBARCREATED)
         {
             auto &menu = trayList.at(hwnd).get();
-            if (Shell_NotifyIcon(NIM_ADD, &menu.notifyData) == FALSE)
+            if (Shell_NotifyIconA(NIM_ADD, &menu.notifyData) == FALSE)
                 throw std::runtime_error("Failed to register tray icon on taskbar created");
         }
         break;
@@ -222,6 +232,17 @@ void Tray::Tray::run()
 {
     static MSG msg;
     while (GetMessage(&msg, hwnd, 0, 0))
+    {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
+
+void Tray::Tray::pump()
+{
+    static MSG msg;
+    if (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
